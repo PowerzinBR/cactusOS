@@ -61,9 +61,10 @@ void terminal_writestring(const char* data) {
 void terminal_write_message(terminal_message_type type, const char* message) {
     uint8_t fg_color, bg_color;
 
+    // Set colors based on message type
     switch (type) {
         case TERMINAL_LOG:
-            fg_color = VGA_COLOR_LIGHT_BLUE;
+            fg_color = VGA_COLOR_LIGHT_GREY;
             bg_color = VGA_COLOR_BLACK;
             break;
         case TERMINAL_SUCCESS:
@@ -84,17 +85,7 @@ void terminal_write_message(terminal_message_type type, const char* message) {
             break;
     }
 
-    terminal_setcolor(vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK));
-    terminal_writestring("[ ");
-    
     terminal_setcolor(vga_entry_color(fg_color, bg_color));
-    terminal_writestring(type == TERMINAL_LOG ? "LOG" :
-                         type == TERMINAL_SUCCESS ? "OK" :
-                         type == TERMINAL_ERROR ? "ERROR" :
-                         type == TERMINAL_INFO ? "INFO" : "UNKNOWN");
-    
-    terminal_setcolor(vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK));
-    terminal_writestring(" ] ");
-
     terminal_writestring(message);
+    terminal_writestring("\n");
 }
