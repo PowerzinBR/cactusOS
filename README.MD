@@ -49,3 +49,6 @@ make multiboot
 ## TODO
 - Improve this README.md
 - Implement more kernel features
+- Read /etc/hostname when implementing a filesystem
+- Implement a fat filesystem
+- Implement interrupts
