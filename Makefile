@@ -33,10 +33,13 @@ $(BUILD_DIR)/lib_string.o: $(KERNEL_DIR)/lib/string.c | $(BUILD_DIR)
 $(BUILD_DIR)/terminal_functions.o: $(KERNEL_DIR)/terminal/terminal.c | $(BUILD_DIR)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
+$(BUILD_DIR)/memory.o: $(KERNEL_DIR)/memory.c | $(BUILD_DIR)
+	$(CC) -c $< -o $@ $(CFLAGS)
+
 # -----------------------------------------
 # Linker step
 # -----------------------------------------
-$(BUILD_DIR)/os.bin: $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/lib_string.o $(BUILD_DIR)/terminal_functions.o | $(BUILD_DIR)
+$(BUILD_DIR)/os.bin: $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/lib_string.o $(BUILD_DIR)/terminal_functions.o  | $(BUILD_DIR)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 # -----------------------------------------
@@ -59,6 +62,6 @@ multiboot:
 
 # -----------------------------------------
 clean:
-	rm -rf $(BUILD_DIR)/* $(ISO_DIR)/*
+	rm -rf $(BUILD_DIR)
 
 .PHONY: all clean run multiboot

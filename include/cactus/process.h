@@ -1,1 +1,1 @@
-#define PROCESS "kernel[0]"
+#define PROCESS "kernel[0] "

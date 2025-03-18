@@ -1,1 +1,1 @@
-#define HOST "Kernel-Host"
+#define HOST "Kernel-Host "
