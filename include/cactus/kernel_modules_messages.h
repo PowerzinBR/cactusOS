@@ -1,6 +1,7 @@
-#define MODULES_MESSAGE_COUNT 2
+#define MODULES_MESSAGE_COUNT 3
 
 const char *modules_messages[MODULES_MESSAGE_COUNT] = {
     "Terminal initialized",
-    "Kernel modules initialized"
+    "GDT module initialized",
+    "Kernel modules initialized",
 };

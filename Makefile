@@ -13,10 +13,10 @@ GRUB_MKRESCUE = grub-mkrescue
 GRUB_FILE = grub-file
 QEMU = qemu-system-i386
 
-CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Iinclude
+CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Iinclude -Iarch/x86/include
 LDFLAGS = -T linker.ld -ffreestanding -O2 -nostdlib -lgcc
 
-all: ${BUILD_DIR}/os.iso
+all: $(BUILD_DIR)/os.iso
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -33,21 +33,28 @@ $(BUILD_DIR)/lib_string.o: $(KERNEL_DIR)/lib/string.c | $(BUILD_DIR)
 $(BUILD_DIR)/terminal_functions.o: $(KERNEL_DIR)/terminal/terminal.c | $(BUILD_DIR)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-$(BUILD_DIR)/memory.o: $(KERNEL_DIR)/memory.c | $(BUILD_DIR)
+$(BUILD_DIR)/cpu_common.o: $(X86_DIR)/cpu/common.c | $(BUILD_DIR)
 	$(CC) -c $< -o $@ $(CFLAGS)
+
+$(BUILD_DIR)/lib_check_gdt.o: $(KERNEL_DIR)/lib/check_gdt.c | $(BUILD_DIR)
+	$(CC) -c $< -o $@ $(CFLAGS)
+
+$(BUILD_DIR)/desc.o: $(X86_DIR)/include/asm/desc.asm | $(BUILD_DIR)
+	$(AS) $< -o $@
 
 # -----------------------------------------
 # Linker step
 # -----------------------------------------
-$(BUILD_DIR)/os.bin: $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/lib_string.o $(BUILD_DIR)/terminal_functions.o  | $(BUILD_DIR)
+$(BUILD_DIR)/os.bin: $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o ${BUILD_DIR}/lib_check_gdt.o $(BUILD_DIR)/desc.o $(BUILD_DIR)/cpu_common.o $(BUILD_DIR)/lib_string.o $(BUILD_DIR)/terminal_functions.o | $(BUILD_DIR)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 # -----------------------------------------
 # Create ISO
 # -----------------------------------------
 $(BUILD_DIR)/os.iso: $(BUILD_DIR)/os.bin
-	cp -r $(BUILD_DIR)/os.bin $(ISO_DIR)/boot/
-	$(GRUB_MKRESCUE) -o $(BUILD_DIR)/os.iso $(ISO_DIR)
+	mkdir -p $(ISO_DIR)/boot
+	cp $(BUILD_DIR)/os.bin $(ISO_DIR)/boot/
+	$(GRUB_MKRESCUE) -o $@ $(ISO_DIR)
 
 run: $(BUILD_DIR)/os.iso
 	$(QEMU) -cdrom $(BUILD_DIR)/os.iso
@@ -62,6 +69,6 @@ multiboot:
 
 # -----------------------------------------
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) $(ISO_DIR)/boot/os.bin
 
 .PHONY: all clean run multiboot

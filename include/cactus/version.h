@@ -1,1 +1,1 @@
-#define KERNEL_VERSION "0.2.3"
+#define KERNEL_VERSION "0.3.2"

@@ -4,6 +4,7 @@
     ".prettierrc": "json",
     "*.css": "css",
     ".dev.vars": "dotenv",
-    "stdint.h": "c"
+    "stdint.h": "c",
+    "stdbool.h": "c"
   }
 }
