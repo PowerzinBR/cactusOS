@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 
-void check_gdt(void);
 void check_gdt_minimized(void);
 
 #endif // CHECK_GDT_H

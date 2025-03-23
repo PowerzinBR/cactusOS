@@ -28,6 +28,26 @@ void terminal_setcolor(uint8_t color) {
     terminal_color = color;
 }
 
+void terminal_writedec(uint32_t num) {
+    char buffer[11];  // Buffer to hold the decimal string (max 10 digits for uint32_t)
+    int index = 0;
+
+    if (num == 0) {
+        buffer[index++] = '0';  // Handle the zero case
+    } else {
+        // Convert the number to a decimal string
+        while (num > 0) {
+            buffer[index++] = '0' + (num % 10);
+            num /= 10;
+        }
+    }
+
+    // Reverse the string and print it
+    for (int i = index - 1; i >= 0; i--) {
+        terminal_putchar(buffer[i]);
+    }
+}
+
 void terminal_putentryat(char c, uint8_t color, size_t x, size_t y) {
     const size_t index = y * VGA_WIDTH + x;
     terminal_buffer[index] = vga_entry(c, color);

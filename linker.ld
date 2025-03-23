@@ -1,41 +1,68 @@
+/* Define the memory region for the kernel.
+   The kernel will load at 0x200000 and has 2 MB of space. */
+MEMORY
+{
+    KERNEL (rwx) : ORIGIN = 0x200000, LENGTH = 2M
+}
+
+/* Entry point of the kernel */
 ENTRY(_start)
 
-/* A memória do kernel é carregada a partir de 2MB */
 SECTIONS
 {
-    . = 2M; /* Posição inicial do kernel */
-    
-    /* Colocando o header Multiboot no início da memória */
-    .multiboot : { *(.multiboot) }
+    /* 
+       Force the file to start at offset 0. This ensures that the .multiboot 
+       section is placed at the very beginning of the file, within the first 8 KB.
+    */
+    . = 0x0;
 
-    /* Código do kernel */
+    /* 
+       Place the Multiboot header at the very beginning of the file.
+       KEEP() prevents the linker from discarding it, even if it's not referenced.
+    */
+    .multiboot : {
+        KEEP(*(.multiboot))
+    } > KERNEL
+
+    /*
+       Move the location counter to the kernel load address.
+       Subsequent sections will be loaded at 0x200000.
+    */
+    . = 0x200000;
+
+    /* Kernel code */
     .text : {
         *(.text)
-    }
+    } > KERNEL
 
-    /* Dados somente leitura */
+    /* Read-only data */
     .rodata : {
         *(.rodata)
-    }
+    } > KERNEL
 
-    /* Dados de leitura e escrita (inicializados) */
+    /* Initialized data */
     .data : {
         *(.data)
-    }
+    } > KERNEL
 
-    /* Dados de leitura e escrita (não inicializados) */
+    /* Uninitialized data (BSS) */
     .bss : {
         *(.bss)
-    }
+        *(COMMON)
+    } > KERNEL
 
-    /* Marca o final do kernel */
+    /* Mark the end of the kernel */
     _kernel_end = .;
 
-    /* Definição do topo do heap */
+    /* Define the start of the heap (if needed) */
     _heap_start = .;
 
-    /* Alocando a pilha */
+    /* Reserve space for the kernel stack */
     .stack : {
-        *(.stack)
-    }
+        . = ALIGN(16);
+        KEEP(*(.stack))
+        /* Reserve 64 KB for the stack */
+        . += 0x10000;
+        . = ALIGN(16);
+    } > KERNEL
 }

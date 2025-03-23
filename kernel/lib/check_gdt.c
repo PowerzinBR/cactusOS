@@ -1,23 +1,13 @@
 #include <cactus/terminal.h>
-#include <cactus/process.h>
 #include <cactus/kernel.h>
-#include <cactus/host.h>
 #include <stdint.h>
 
 #include "../../arch/x86/include/asm/desc.h"
 
 /* Simple error logging buffer */
-#define MAX_ERROR_LOG_SIZE 1024
+#define MAX_ERROR_LOG_SIZE 256
 static char error_log[MAX_ERROR_LOG_SIZE];
 static uint32_t error_log_index = 0;
-
-static void delay(uint32_t milliseconds) {
-    // Approximate loops per millisecond (calibrate this for your system)
-    const uint32_t loops_per_millisecond = 1000000;
-    for (uint32_t i = 0; i < milliseconds * loops_per_millisecond; i++) {
-        // Do nothing, just waste time
-    }
-}
 
 /* Append an error message to our log */
 static void log_error(const char *msg) {
@@ -71,93 +61,6 @@ static void int_to_dec(uint32_t num, char *buffer) {
     }
     buffer[index] = '\0';
 }
-
-// void check_gdt(void) {
-//     struct gdt_ptr current_gdt;
-//     char hex_buffer[11];
-//     char dec_buffer[11];
-
-//     /* Read the current GDTR into current_gdt */
-//     asm volatile("sgdt %0" : "=m"(current_gdt));
-
-//     terminal_writestring("Checking GDT...\n");
-
-//     /* Print current GDTR values */
-//     int_to_hex(current_gdt.base, hex_buffer);
-//     terminal_writestring("Current GDTR Base: ");
-//     terminal_writestring(hex_buffer);
-//     terminal_writestring("\n");
-
-//     int_to_hex(current_gdt.limit, hex_buffer);
-//     terminal_writestring("Current GDTR Limit: ");
-//     terminal_writestring(hex_buffer);
-//     terminal_writestring("\n");
-
-//     /* Print expected GDTR values */
-//     int_to_hex(gdt_descriptor.base, hex_buffer);
-//     terminal_writestring("Expected GDTR Base: ");
-//     terminal_writestring(hex_buffer);
-//     terminal_writestring("\n");
-
-//     int_to_hex(gdt_descriptor.limit, hex_buffer);
-//     terminal_writestring("Expected GDTR Limit: ");
-//     terminal_writestring(hex_buffer);
-//     terminal_writestring("\n");
-
-//     /* Compare the current GDTR with our expected gdt_descriptor */
-//     if (current_gdt.base != gdt_descriptor.base || current_gdt.limit != gdt_descriptor.limit) {
-//         terminal_writestring("GDT Check Failed: GDTR mismatch.\n");
-//         log_error("GDTR mismatch between loaded GDT and expected descriptor.");
-//     } else {
-//         terminal_writestring("GDT Loaded Successfully.\n");
-//     }
-
-//     /* Calculate the number of GDT entries:
-//      * Each GDT entry is sizeof(struct gdt_entry) bytes.
-//      */
-//     uint32_t num_entries = (gdt_descriptor.limit + 1) / sizeof(struct gdt_entry);
-//     int_to_dec(num_entries, dec_buffer);
-//     terminal_writestring("Number of GDT entries: ");
-//     terminal_writestring(dec_buffer);
-//     terminal_writestring("\n");
-
-//     for (uint32_t i = 0; i < num_entries; i++) {
-//         terminal_writestring("GDT Entry ");
-//         int_to_dec(i, dec_buffer);
-//         terminal_writestring(dec_buffer);
-//         terminal_writestring(":\n");
-
-//         struct gdt_entry *entry = &gdt[i];
-//         uint32_t base = entry->base_low | (entry->base_middle << 16) | (entry->base_high << 24);
-//         uint32_t limit = entry->limit_low | ((entry->granularity & 0x0F) << 16);
-
-//         terminal_writestring("  Base: ");
-//         int_to_hex(base, hex_buffer);
-//         terminal_writestring(hex_buffer);
-//         terminal_writestring(", Limit: ");
-//         int_to_hex(limit, hex_buffer);
-//         terminal_writestring(hex_buffer);
-//         terminal_writestring(", Access: ");
-//         int_to_hex(entry->access, hex_buffer);
-//         terminal_writestring(hex_buffer);
-//         terminal_writestring(", Granularity: ");
-//         int_to_hex(entry->granularity, hex_buffer);
-//         terminal_writestring(hex_buffer);
-//         terminal_writestring("\n");
-
-//         /* Additional check for the null descriptor (entry 0) */
-//         if (i == 0) {
-//             if (base != 0 || limit != 0 || entry->access != 0 || entry->granularity != 0) {
-//                 terminal_writestring("Error: Null descriptor (entry 0) is not zeroed.\n");
-//                 log_error("GDT entry 0 is not zero as expected.");
-//             }
-//         }
-//     }
-
-//     if (error_log_index > 0) {
-//         print_error_log();
-//     }
-// }
 
 void check_gdt_minimized(void) {
     struct gdt_ptr current_gdt;

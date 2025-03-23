@@ -1,1 +1,0 @@
-#define HOST "Kernel-Host "

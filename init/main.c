@@ -2,17 +2,19 @@
 #include <cactus/grub_messages.h>
 #include <cactus/check_gdt.h>
 #include <cactus/terminal.h>
-#include <cactus/version.h>
-#include <cactus/process.h>
 #include <cactus/kernel.h>
 #include <cactus/string.h>
-#include <cactus/host.h>
 #include <stdbool.h>
 
 #include "../arch/x86/include/asm/desc.h"
+#include "../arch/x86/include/asm/idt_desc.h"
+
+extern void idt_install_isr0(void);
 
 void kernel_main() {
     gdt_init();
+    idt_init();
+    idt_install_isr0();
     terminal_initialize();
 
     for (int i = 0; i < GRUB_MESSAGES_COUNT; i++) {
@@ -45,4 +47,5 @@ void kernel_main() {
     terminal_writestring("\n");
 
     check_gdt_minimized();
+    debug_print_idt();
 }
